@@ -10,6 +10,7 @@ import pandas
 # import tqdm
 import cProfile, pstats, io
 from pstats import SortKey
+import time
  
 ''' Lines information. '''
 LINES = [[1, 1, 1, 1, 1, ],
@@ -50,11 +51,19 @@ PAYTABLE = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
  Shoe win probability distribution. First is value and second is the chance (sum of chances is 100).
  '''
 SHOE = [5] * 17 + [10] * 16 + [15] * 16 + [25] * 16 + [50] * 15 + [100] * 10 + [200] * 5 + [250] * 3 + [300] * 2 + [500] * 1
+random.shuffle(SHOE)
  
 '''
  Jakpot win probability distribution. First is value and second is the chance (sum of chances is 1000).
  '''
 JACKPOT = [0] * 990 + [3] * 4 + [5] * 3 + [7] * 2 + [9] * 1
+random.shuffle(JACKPOT)
+
+'''
+Available bonus values.
+'''
+BONUS = {}
+for multiplier in JACKPOT: BONUS[multiplier] = 0
  
 ''' Names of the symbols. '''
 SYMBOLS_NAMES = ["FIRE", "GOLD", "WHITE", "BLACK", "BOY", "GIRL", "ACE", "KING", "QUEEN", "JACK", "SHOE", "JACKPOT", "COLLECT"]
@@ -147,12 +156,12 @@ view = [[-1, -1, -1],
 
 
 def printView(view):
-    max = len(view[0])
+    maximum = len(view[0])
     for i in range(0, len(view)):
         if max < len(view[i]):
-            max = len(view[i])
+            maximum = len(view[i])
  
-    for j in range(0, max):
+    for j in range(0, maximum):
         for i in range(0, min(len(view), len(view[i]))):
             print(SYMBOLS_NAMES[view[i][j]] + "\t", end="")
  
@@ -211,14 +220,13 @@ def lineWin(line):
     '''
      Wild symbol passing to find first regular symbol.
      '''
-    for i in range(0, len(line)):
+    for value in line:
         '''
          First no wild symbol found.
          '''
         if symbol != 1:
             break
- 
-        symbol = line[i]
+        symbol = value
  
     '''
      Wild symbol substitution.
@@ -266,14 +274,14 @@ def linesWin(view):
     '''
      Check wins in all possible lines.
      '''
-    for l in range(0, len(LINES)):
+    for indices in LINES:
         line = [-1, -1, -1, -1, -1]
  
         '''
          Prepare line for combination check.
          '''
         for i in range(0, len(line)):
-            index = LINES[l][i]
+            index = indices[i]
             line[i] = view[i][index]
  
         result = lineWin(line)
@@ -297,12 +305,10 @@ def linesWin(view):
 
 def scattersWin(view):
     number = 0
- 
-    for i in range(0, len(view)):
-        for j in range(0, len(view[i])):
-            if view[i][j] != 0:
+    for values in view:
+        for value in values:
+            if value != 0:
                 continue
- 
             number += 1
  
     ''' Scatter is on index 0. '''
@@ -319,18 +325,16 @@ def collectWin():
     win = 0
     collect = 0
   
-    for i in range(0, len(view)):
-        for j in range(0, len(view[i])):
+    for values in view:
+        for value in values:
             '''
              Win is collected only if the collect symbol is on the screen.
              '''
-            if view[i][j] == 12:
+            if value == 12:
                 collect = 1
-  
             ''' Only shoe symbols accumulate such a win. '''
-            if view[i][j] != 10:
+            if value != 10:
                 continue
-  
             win += random.choice(SHOE)
   
     return win * collect
@@ -346,20 +350,23 @@ def collectWin():
 
 
 def spin(view, reels):
-    for i in range(0, min(len(view), len(reels))):
-        r = random.randint(0, len(reels[i]) - 1)
+    index = 0
+    for reel in reels:
+        r = random.randint(0, len(reel) - 1)
         u = r - 1
         d = r + 1
  
         if u < 0:
-            u = len(reels[i]) - 1
+            u = len(reel) - 1
  
-        if d >= len(reels[i]):
+        if d >= len(reel):
             d = 0
  
-        view[i][0] = reels[i][u]
-        view[i][1] = reels[i][r]
-        view[i][2] = reels[i][d]
+        view[index][0] = reel[u]
+        view[index][1] = reel[r]
+        view[index][2] = reel[d]
+        
+        index += 1
  
 '''
  Calculation of the free spins number.
@@ -373,9 +380,9 @@ def spin(view, reels):
 
 def numberOfFreeSpins(freeSpins):
     number = 0
-    for i in range(0, len(view)):
-        for j in range(0, len(view[i])):
-            if view[i][j] != 0:
+    for values in view:
+        for value in values:
+            if value != 0:
                 continue
             number += 1
  
@@ -392,17 +399,17 @@ def numberOfBonusGames():
     collect = False
     jackpot = 0
  
-    for i in range(0, len(view)):
-        for j in range(0, len(view[i])):
+    for values in view:
+        for value in values:
             '''
              Bonus game is activated only if the collect symbol is on the
              screen.
              '''
-            if view[i][j] == 12:
+            if value == 12:
                 collect = True
  
             ''' Only shoe jackpot symbols activate bonus game. '''
-            if view[i][j] != 11:
+            if value != 11:
                 jackpot += 1
  
     if collect == False:
@@ -416,23 +423,18 @@ def numberOfBonusGames():
 
 
 def singleBonusGame():
-    counters = {}
-   
     ''' Initialize zeros for a histogram. '''
-    for i in range(0, len(JACKPOT)):
-        counters[JACKPOT[i]] = 0
+    counters = BONUS.copy()
     
-    for i in range(0, len(view)):
-        for j in range(0, len(view[i])):
-            value = random.choice(JACKPOT)
-            counters[value] = counters[value] + 1
-    
+    for multiplier in random.sample(JACKPOT, 15):
+        counters[multiplier] += 1
+
     win = 0
-    for i in range(0, len(JACKPOT)):
+    for multiplier in JACKPOT:
         ''' Only 3 or more rise a win. '''
-        if counters[JACKPOT[i]] < 3 or JACKPOT[i] == 0:
+        if counters[multiplier] < 3 or multiplier == 0:
             continue
-        win = JACKPOT[i] * totalBet
+        win = multiplier * totalBet
         break
     
     '''
@@ -500,7 +502,7 @@ def singleFreeGame():
      Play bonus game if any.
      '''
     global totalNumberOfBonusGames
-    for g in range(0, bonusGamesNumber):
+    for g in range(0, bonusGamesNumber):  # @UnusedVariable
         totalNumberOfBonusGames += 1
         singleBonusGame()
  
@@ -552,7 +554,7 @@ def singleBaseGame():
      Play all triggered free games.
      '''
     global totalNumberOfFreeGames
-    for g in range(0, freeGamesNumber):
+    for g in range(0, freeGamesNumber):  # @UnusedVariable
         totalNumberOfFreeGames += 1
         singleFreeGame()
   
@@ -562,7 +564,7 @@ def singleBaseGame():
      Play bonus game if any.
      '''
     global totalNumberOfBonusGames
-    for g in range(0, bonusGamesNumber):
+    for g in range(0, bonusGamesNumber):  # @UnusedVariable
         totalNumberOfBonusGames += 1
         singleBonusGame()
  
@@ -647,12 +649,12 @@ def printDataStructures():
     print("Total:\t", end="")
     combinations = 1
     for i in range(0, len(counters)):
-        sum = 0
+        total = 0
         for j in range(0, len(counters[0])):
-            sum += counters[i][j]
-        print(sum + "\t", end="")
-        if sum != 0:
-            combinations *= sum
+            total += counters[i][j]
+        print(total + "\t", end="")
+        if total != 0:
+            combinations *= total
     print()
     print("---------------------------------------------")
     print("Combinations:\t" + combinations)
@@ -680,12 +682,12 @@ def printDataStructures():
     print("Total:\t", end="")
     combinations = 1
     for i in range(i, len(counters)):
-        sum = 0
+        total = 0
         for j in range(0, len(counters[0])):
-            sum += counters[i][j]
-        print(sum + "\t", end="")
-        if sum != 0:
-            combinations *= sum
+            total += counters[i][j]
+        print(total + "\t", end="")
+        if total != 0:
+            combinations *= total
     print()
     print("---------------------------------------------")
     print("Combinations:\t" + combinations)
@@ -821,8 +823,10 @@ if __name__ == '__main__':
   
     profiler = cProfile.Profile()
     profiler.enable()
+    moment = int(time.time())
     for g in (range(0, numberOfSimulations)):
-        if verboseOutput == True and ((g + 1) * 100) % numberOfSimulations == 0:
+        if verboseOutput == True and moment+10 < int(time.time()):
+            moment = int(time.time())
             print()
             print()
             print()
@@ -847,9 +851,10 @@ if __name__ == '__main__':
     '''
     Print profiling information.
     '''
-    pstats.Stats(profiler, stream=io.StringIO()).sort_stats(SortKey.CUMULATIVE).print_stats()
-    print(io.StringIO().getvalue())
-  
+    stream = io.StringIO()
+    pstats.Stats(profiler, stream=stream).sort_stats(SortKey.CUMULATIVE).print_stats()
+    print(stream.getvalue())
+
     '''
     Print the final statistics.
     '''
