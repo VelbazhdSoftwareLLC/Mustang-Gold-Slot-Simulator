@@ -11,40 +11,52 @@ import tqdm
  
 ''' Lines information. '''
 LINES = [[1, 1, 1, 1, 1, ],
-[0, 0, 0, 0, 0, ], [2, 2, 2, 2, 2, ],
-[0, 1, 2, 1, 0, ], [2, 1, 0, 1, 2, ],
-[1, 0, 0, 0, 1, ], [1, 2, 2, 2, 1, ],
-[0, 0, 1, 2, 2, ], [2, 2, 1, 0, 0, ],
-[1, 2, 1, 0, 1, ], [1, 0, 1, 2, 1, ],
-[0, 1, 1, 1, 0, ], [2, 1, 1, 1, 2, ],
-[0, 1, 0, 1, 0, ], [2, 1, 2, 1, 2, ],
-[1, 1, 0, 1, 1, ], [1, 1, 2, 1, 1, ],
-[0, 0, 2, 0, 0, ], [2, 2, 0, 2, 2, ],
-[0, 2, 2, 2, 0, ], [2, 0, 0, 0, 2, ],
-[1, 2, 0, 2, 1, ], [1, 0, 2, 0, 1, ],
-[0, 2, 0, 2, 0, ], [2, 0, 2, 0, 2, ], ]
+         [0, 0, 0, 0, 0, ],
+         [2, 2, 2, 2, 2, ],
+         [0, 1, 2, 1, 0, ],
+         [2, 1, 0, 1, 2, ],
+         [1, 0, 0, 0, 1, ],
+         [1, 2, 2, 2, 1, ],
+         [0, 0, 1, 2, 2, ],
+         [2, 2, 1, 0, 0, ],
+         [1, 2, 1, 0, 1, ],
+         [1, 0, 1, 2, 1, ],
+         [0, 1, 1, 1, 0, ],
+         [2, 1, 1, 1, 2, ],
+         [0, 1, 0, 1, 0, ],
+         [2, 1, 2, 1, 2, ],
+         [1, 1, 0, 1, 1, ],
+         [1, 1, 2, 1, 1, ],
+         [0, 0, 2, 0, 0, ],
+         [2, 2, 0, 2, 2, ],
+         [0, 2, 2, 2, 0, ],
+         [2, 0, 0, 0, 2, ],
+         [1, 2, 0, 2, 1, ],
+         [1, 0, 2, 0, 1, ],
+         [0, 2, 0, 2, 0, ],
+         [2, 0, 2, 0, 2, ], ]
  
 ''' Pay table information. Index 0 is a scatter. Index 1 is a wild. '''
-PAYTABLE = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-[1, 0, 10, 10, 10, 10, 5, 5, 5, 5, 0, 0, ],
-[0, 0, 50, 50, 25, 25, 15, 15, 15, 15, 0, 0, ],
-[0, 0, 500, 300, 250, 200, 100, 100, 100, 100, 0, 0, ], ]
+PAYTABLE = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
+            [1, 0, 10, 10, 10, 10, 5, 5, 5, 5, 0, 0, 0, ],
+            [0, 0, 50, 50, 25, 25, 15, 15, 15, 15, 0, 0, 0, ],
+            [0, 0, 500, 300, 250, 200, 100, 100, 100, 100, 0, 0, 0, ], ]
  
 '''
  Shoe win probability distribution. The first array holds the percent of
  chance for the win from the second array.
  '''
 SHOE = [[17, 16, 16, 16, 15, 10, 5, 3, 2, 1, ],
-[5, 10, 15, 25, 50, 100, 200, 250, 300, 500, ], ]
+        [5, 10, 15, 25, 50, 100, 200, 250, 300, 500, ], ]
  
 '''
  Jakpot win probability distribution. The first array holds the percent of
  chance for the multiplier from the second array.
  '''
 JACKPOT = [[64, 20, 10, 5, 1, ],
-[0, 50, 100, 200, 1000, ], ]
+           [0, 50, 100, 200, 1000, ], ]
  
 ''' Names of the symbols. '''
 SYMBOLS_NAMES = ["FIRE", "GOLD", "WHITE", "BLACK", "BOY", "GIRL", "ACE", "KING", "QUEEN", "JACK", "SHOE", "JACKPOT", "COLLECT"]
@@ -119,7 +131,11 @@ freeGamesNumber = 0
 totalBet = len(LINES)
  
 ''' Screen configuration after reels spins. '''
-view = [[-1, -1, -1], [-1, -1, -1], [-1, -1, -1], [-1, -1, -1], [-1, -1, -1]]
+view = [[-1, -1, -1],
+        [-1, -1, -1],
+        [-1, -1, -1],
+        [-1, -1, -1],
+        [-1, -1, -1]]
  
 '''
  Print active screen configuration.
@@ -561,12 +577,9 @@ def printDataStructures():
     if (inDataOutput == False):
         return
  
-    print(
-            "================================================================================")
-    print(
-            "================================================================================")
-    print(
-            "================================================================================")
+    print("================================================================================")
+    print("================================================================================")
+    print("================================================================================")
  
     print("Paytable:")
     for i in range(0, len(PAYTABLE)):
@@ -617,10 +630,10 @@ def printDataStructures():
     print("Base Game Reels:")
     ''' Count symbols in reels. ''' 
     counters = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ], ]
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ], ]
     for i in range(0, len(BASE_GAME_REELS)):
         for j in range(0, len(BASE_GAME_REELS[i])):
             counters[i][BASE_GAME_REELS[i][j]] += 1
@@ -650,10 +663,10 @@ def printDataStructures():
     print("Free Spin Reels:")
     ''' Count symbols in reels. '''
     counters = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ], ]
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ], ]
     for i in range(0, len(FREE_SPIN_REELS)):
         for j in range(0, len(FREE_SPIN_REELS[i])):
             counters[i][FREE_SPIN_REELS[i][j]] += 1
@@ -691,30 +704,19 @@ def printStatistics():
     print("Total Number of Games:\t" + str(totalNumberOfGames))
     print()
  
-    print(
-            "Total RTP:\t" + str(wonMoney / lostMoney))
-    print("Base Game RTP:\t"
-            +str((baseMoney) / (lostMoney)))
-    print("Free Spins RTP:\t"
-            +str((freeMoney) / (lostMoney)))
-    print("Bonus Game RTP:\t"
-            +str((bonusMoney) / (lostMoney)))
+    print("Total RTP:\t" + str(wonMoney / lostMoney))
+    print("Base Game RTP:\t" + str((baseMoney) / (lostMoney)))
+    print("Free Spins RTP:\t" + str((freeMoney) / (lostMoney)))
+    print("Bonus Game RTP:\t" + str((bonusMoney) / (lostMoney)))
     print()
  
-    print("Base Game Hit Rate:\t"
-            +str(baseGameHitRate / totalNumberOfGames))
-    print("Free Spins Hit Rate:\t" + str(freeGamesHitRate
-            / totalNumberOfFreeGames))
-    print("Bonus Game Hit Rate:\t" + str(bonusGameHitRate
-            / totalNumberOfBonusGames))
+    print("Base Game Hit Rate:\t" + str(baseGameHitRate / totalNumberOfGames))
+    print("Free Spins Hit Rate:\t" + str(freeGamesHitRate / totalNumberOfFreeGames))
+    print("Bonus Game Hit Rate:\t" + str(bonusGameHitRate / totalNumberOfBonusGames))
     print()
  
-    print("Hit Frequency into Free Spins:\t"
-            +str(totalNumberOfFreeStarts
-                    / totalNumberOfGames))
-    print("Free Spins Retrigger Frequency:\t"
-            +str(totalNumberOfFreeRestarts
-                    / (totalNumberOfFreeGames)))
+    print("Hit Frequency into Free Spins:\t" + str(totalNumberOfFreeStarts / totalNumberOfGames))
+    print("Free Spins Retrigger Frequency:\t" + str(totalNumberOfFreeRestarts / (totalNumberOfFreeGames)))
  
 '''
 Print of the help information.
@@ -722,78 +724,42 @@ Print of the help information.
 
 
 def printHelp():
-    print(
-            "*******************************************************************************")
-    print(
-            "* Mustang Gold Simulator v1.0                                                 *")
-    print(
-            "* Copyrights (C) 2020 Velbazhd Software LLC ( http://veldsoft.eu/ )           *")
-    print(
-            "*                                                                             *")
-    print(
-            "* developed by Todor Balabanov ( todor.balabanov@gmail.com )                  *")
-    print(
-            "* Sofia, Bulgaria                                                             *")
-    print(
-            "*                                                                             *")
-    print(
-            "* This is private property software. In-house use only.                       *")
-    print(
-            "*******************************************************************************")
-    print(
-            "*                                                                             *")
-    print(
-            "* -h              Help screen.                                                *")
-    print(
-            "* -help           Help screen.                                                *")
-    print(
-            "*                                                                             *")
-    print(
-            "* -l<number>      Number of games.                                            *")
-    print(
-            "*                                                                             *")
-    print(
-            "* -indata         Print input data structures.                                *")
-    print(
-            "* -verbose        More details on simulation progress.                        *")
-    print(
-            "*                                                                             *")
-    print(
-            "*                                                                             *")
-    print(
-            "* Output will be on the screen!                                               *")
-    print(
-            "*                                                                             *")
-    print(
-            "* Ctrl+C to abort simulation.                                                 *")
-    print(
-            "*                                                                             *")
-    print(
-            "* python Main.py -l1000                                                       *")
-    print(
-            "* Do 1 000 iterations.                                                        *")
-    print(
-            "*                                                                             *")
-    print(
-            "* python Main.py -l1000k                                                      *")
-    print(
-            "* Do 1 000 000 iterations.                                                    *")
-    print(
-            "*                                                                             *")
-    print(
-            "* python Main.py -l10m                                                        *")
-    print(
-            "* Do 10 000 000 iterations.                                                   *")
-    print(
-            "*                                                                             *")
-    print(
-            "* python Main.py                                                              *")
-    print(
-            "* Do 10 000 000 iterations as default value.                                  *")
-    print(
-            "*                                                                             *")
-    print(
-            "*******************************************************************************")
+    print("*******************************************************************************")
+    print("* Mustang Gold Simulator v1.0                                                 *")
+    print("* Copyrights (C) 2020 Velbazhd Software LLC ( http://veldsoft.eu/ )           *")
+    print("*                                                                             *")
+    print("* developed by Todor Balabanov ( todor.balabanov@gmail.com )                  *")
+    print("* Sofia, Bulgaria                                                             *")
+    print("*                                                                             *")
+    print("* This is private property software. In-house use only.                       *")
+    print("*******************************************************************************")
+    print("*                                                                             *")
+    print("* -h              Help screen.                                                *")
+    print("* -help           Help screen.                                                *")
+    print("*                                                                             *")
+    print("* -l<number>      Number of games.                                            *")
+    print("*                                                                             *")
+    print("* -indata         Print input data structures.                                *")
+    print("* -verbose        More details on simulation progress.                        *")
+    print("*                                                                             *")
+    print("*                                                                             *")
+    print("* Output will be on the screen!                                               *")
+    print("*                                                                             *")
+    print("* Ctrl+C to abort simulation.                                                 *")
+    print("*                                                                             *")
+    print("* python Main.py -l1000                                                       *")
+    print("* Do 1 000 iterations.                                                        *")
+    print("*                                                                             *")
+    print("* python Main.py -l1000k                                                      *")
+    print("* Do 1 000 000 iterations.                                                    *")
+    print("*                                                                             *")
+    print("* python Main.py -l10m                                                        *")
+    print("* Do 10 000 000 iterations.                                                   *")
+    print("*                                                                             *")
+    print("* python Main.py                                                              *")
+    print("* Do 10 000 000 iterations as default value.                                  *")
+    print("*                                                                             *")
+    print("*******************************************************************************")
  
 '''
  Print of the execution command.
@@ -827,7 +793,7 @@ if __name__ == '__main__':
     printExecuteCommand(sys.argv)
     print()
   
-    numberOfSimulations = 100000#00
+    numberOfSimulations = 10000  # 000
   
     for a in range(0, len(sys.argv)):
         if (len(sys.argv) > 0 and "-l" in sys.argv[a]):
@@ -867,13 +833,9 @@ if __name__ == '__main__':
             print()
             print()
             print()
-            print(
-                    "================================================================================")
-            print("Progress: "
-                    +(10000 * (g + 1) / numberOfSimulations) / 100.0
-                    +"%")
-            print(
-                    "================================================================================")
+            print("================================================================================")
+            print("Progress: " + (10000 * (g + 1) / numberOfSimulations) / 100.0 + "%")
+            print("================================================================================")
             print()
             printStatistics()
             print()
@@ -891,16 +853,10 @@ if __name__ == '__main__':
     print()
     print()
     printDataStructures()
-    print(
-            "================================================================================")
-    print(
-            "================================================================================")
-    print(
-            "================================================================================")
+    print("================================================================================")
+    print("================================================================================")
+    print("================================================================================")
     printStatistics()
-    print(
-            "================================================================================")
-    print(
-            "================================================================================")
-    print(
-            "================================================================================")
+    print("================================================================================")
+    print("================================================================================")
+    print("================================================================================")
