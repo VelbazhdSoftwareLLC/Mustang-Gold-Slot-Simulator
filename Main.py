@@ -7,7 +7,9 @@ Created on Dec 27, 2020
 import sys
 import random
 import pandas
-import tqdm
+# import tqdm
+import cProfile, pstats, io
+from pstats import SortKey
  
 ''' Lines information. '''
 LINES = [[1, 1, 1, 1, 1, ],
@@ -817,6 +819,8 @@ if __name__ == '__main__':
         if len(sys.argv) > 0 and "-h" in sys.argv[a]:
             exit(0)
   
+    profiler = cProfile.Profile()
+    profiler.enable()
     for g in (range(0, numberOfSimulations)):
         if verboseOutput == True and ((g + 1) * 100) % numberOfSimulations == 0:
             print()
@@ -838,7 +842,17 @@ if __name__ == '__main__':
         totalNumberOfGames += 1
         lostMoney += totalBet
         singleBaseGame()
+    profiler.disable()
+    
+    '''
+    Print profiling information.
+    '''
+    pstats.Stats(profiler, stream=io.StringIO()).sort_stats(SortKey.CUMULATIVE).print_stats()
+    print(io.StringIO().getvalue())
   
+    '''
+    Print the final statistics.
+    '''
     print()
     print()
     print()
