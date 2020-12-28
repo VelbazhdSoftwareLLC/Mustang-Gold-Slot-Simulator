@@ -45,18 +45,14 @@ PAYTABLE = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
             [0, 0, 500, 300, 250, 200, 100, 100, 100, 100, 0, 0, 0, ], ]
  
 '''
- Shoe win probability distribution. The first array holds the percent of
- chance for the win from the second array.
+ Shoe win probability distribution. First is value and second is the chance (sum of chances is 100).
  '''
-SHOE = [[17, 16, 16, 16, 15, 10, 5, 3, 2, 1, ],
-        [5, 10, 15, 25, 50, 100, 200, 250, 300, 500, ], ]
+SHOE = [5] * 17 + [10] * 16 + [15] * 16 + [25] * 16 + [50] * 15 + [100] * 10 + [200] * 5 + [250] * 3 + [300] * 2 + [500] * 1
  
 '''
- Jakpot win probability distribution. The first array holds the percent of
- chance for the multiplier from the second array.
+ Jakpot win probability distribution. First is value and second is the chance (sum of chances is 1000).
  '''
-JACKPOT = [[64, 20, 10, 5, 1, ],
-           [0, 50, 100, 200, 1000, ], ]
+JACKPOT = [0] * 990 + [3] * 4 + [5] * 3 + [7] * 2 + [9] * 1
  
 ''' Names of the symbols. '''
 SYMBOLS_NAMES = ["FIRE", "GOLD", "WHITE", "BLACK", "BOY", "GIRL", "ACE", "KING", "QUEEN", "JACK", "SHOE", "JACKPOT", "COLLECT"]
@@ -127,6 +123,9 @@ bonusGameHitRate = 0
 ''' Counter of the free spins during simulation run of a free spins. '''
 freeGamesNumber = 0
  
+''' Counter of the bonus games during simulation run of a bonus games. '''
+bonusGamesNumber = 0
+ 
 ''' Total bet for a single spin of a base game. '''
 totalBet = len(LINES)
  
@@ -148,7 +147,7 @@ view = [[-1, -1, -1],
 def printView(view):
     max = len(view[0])
     for i in range(0, len(view)):
-        if (max < len(view[i])):
+        if max < len(view[i]):
             max = len(view[i])
  
     for j in range(0, max):
@@ -175,7 +174,7 @@ def reelsFromTextToNumbers(numbers, text):
         for j in range(0, len(text[i])):
             numbers[i].insert(j, -1)
             for k in range(0, len(SYMBOLS_NAMES)):
-                if (SYMBOLS_NAMES[k] not in text[i][j]):
+                if SYMBOLS_NAMES[k] not in text[i][j]:
                     continue
                 numbers[i][j] = k
                 break
@@ -204,7 +203,7 @@ def lineWin(line):
     symbol = line[0]
  
     ''' If there is no symbol there is no win. '''
-    if (symbol == -1):
+    if symbol == -1:
         return 0
  
     '''
@@ -214,7 +213,7 @@ def lineWin(line):
         '''
          First no wild symbol found.
          '''
-        if (symbol != 1):
+        if symbol != 1:
             break
  
         symbol = line[i]
@@ -223,7 +222,7 @@ def lineWin(line):
      Wild symbol substitution.
      '''
     for i in range(0, len(line)):
-        if (line[i] == 1):
+        if line[i] == 1:
             '''
              Substitute wild with regular symbol.
              '''
@@ -234,7 +233,7 @@ def lineWin(line):
      '''
     number = 0
     for i in range(0, len(line)):
-        if (line[i] == symbol):
+        if line[i] == symbol:
             number += 1
         else:
             break
@@ -299,7 +298,7 @@ def scattersWin(view):
  
     for i in range(0, len(view)):
         for j in range(0, len(view[i])):
-            if (view[i][j] != 0):
+            if view[i][j] != 0:
                 continue
  
             number += 1
@@ -318,30 +317,19 @@ def collectWin():
     win = 0
     collect = 0
   
-    total = 0
-    for i in range(0, len(SHOE[0])):
-        total += SHOE[0][i]
-  
     for i in range(0, len(view)):
         for j in range(0, len(view[i])):
             '''
              Win is collected only if the collect symbol is on the screen.
              '''
-            if (view[i][j] == 12):
+            if view[i][j] == 12:
                 collect = 1
   
             ''' Only shoe symbols accumulate such a win. '''
-            if (view[i][j] != 10):
+            if view[i][j] != 10:
                 continue
   
-            ''' TODO It should be checked because it can be wrong. '''
-            sum = 0
-            chance = random.randint(0, total - 1)
-            for k in range(0, len(SHOE[1])):
-                sum += SHOE[0][k]
-                if (sum >= chance):
-                    win += SHOE[1][k]
-                    break
+            win += random.choice(SHOE)
   
     return win * collect
  
@@ -361,10 +349,10 @@ def spin(view, reels):
         u = r - 1
         d = r + 1
  
-        if (u < 0):
+        if u < 0:
             u = len(reels[i]) - 1
  
-        if (d >= len(reels[i])):
+        if d >= len(reels[i]):
             d = 0
  
         view[i][0] = reels[i][u]
@@ -383,12 +371,10 @@ def spin(view, reels):
 
 def numberOfFreeSpins(freeSpins):
     number = 0
- 
     for i in range(0, len(view)):
         for j in range(0, len(view[i])):
-            if (view[i][j] != 0):
+            if view[i][j] != 0:
                 continue
- 
             number += 1
  
     return (freeSpins[number])
@@ -400,9 +386,9 @@ def numberOfFreeSpins(freeSpins):
  '''
 
 
-def collectJackpot():
+def numberOfBonusGames():
     collect = False
-    jackpot = False
+    jackpot = 0
  
     for i in range(0, len(view)):
         for j in range(0, len(view[i])):
@@ -410,14 +396,17 @@ def collectJackpot():
              Bonus game is activated only if the collect symbol is on the
              screen.
              '''
-            if (view[i][j] == 12):
+            if view[i][j] == 12:
                 collect = True
  
             ''' Only shoe jackpot symbols activate bonus game. '''
-            if (view[i][j] != 11):
-                jackpot = True
+            if view[i][j] != 11:
+                jackpot += 1
  
-    return collect and jackpot
+    if collect == False:
+        jackpot = 0
+ 
+    return jackpot
  
 '''
  Run of a single bonus game.
@@ -428,30 +417,22 @@ def singleBonusGame():
     counters = {}
    
     ''' Initialize zeros for a histogram. '''
-    total = 0
-    for i in range(0, len(JACKPOT[1])):
-        counters[JACKPOT[1][i]] = 0
-        total += JACKPOT[0][i]
-   
+    for i in range(0, len(JACKPOT)):
+        counters[JACKPOT[i]] = 0
+    
     for i in range(0, len(view)):
         for j in range(0, len(view[i])):
-            ''' TODO It should be checked because it can be wrong. '''
-            sum = 0
-            chance = random.randint(0, total - 1)
-            for k in range(0, len(JACKPOT[1])):
-                sum += JACKPOT[0][k]
-                if (sum >= chance):
-                    counters[JACKPOT[1][i]] = counters[JACKPOT[1][i]] + 1
-                    break
-   
+            value = random.choice(JACKPOT)
+            counters[value] = counters[value] + 1
+    
     win = 0
-    for i in range(0, len(JACKPOT[1])):
+    for i in range(0, len(JACKPOT)):
         ''' Only 3 or more rise a win. '''
-        if (counters[JACKPOT[1][i]] < 3):
+        if counters[JACKPOT[i]] < 3 or JACKPOT[i] == 0:
             continue
-        win = JACKPOT[1][i]
+        win = JACKPOT[i] * totalBet
         break
-   
+    
     '''
      Add win to the statistics.
      '''
@@ -459,8 +440,9 @@ def singleBonusGame():
     bonusMoney += win
     global wonMoney
     wonMoney += win
-   
-    if (win > 0):
+    
+    global bonusGameHitRate
+    if win > 0:
         '''
          Count free spins hit rate.
          '''
@@ -488,7 +470,7 @@ def singleFreeGame():
      Count free spins hit rate.
      '''
     global freeGamesHitRate
-    if (win > 0):
+    if win > 0:
         freeGamesHitRate += 1
   
     value = numberOfFreeSpins(FREE_SPINS_IN_FREE)
@@ -497,7 +479,7 @@ def singleFreeGame():
      Count how many times free games are re-triggered.
      '''
     global totalNumberOfFreeRestarts
-    if (value > 0):
+    if value > 0:
         totalNumberOfFreeRestarts += 1
   
     '''
@@ -505,11 +487,19 @@ def singleFreeGame():
      '''
     global freeGamesNumber
     freeGamesNumber += value
+    
+    '''
+     Number of bonus games should be added.
+     '''
+    global bonusGamesNumber
+    bonusGamesNumber += numberOfBonusGames()
   
     '''
      Play bonus game if any.
      '''
-    if (collectJackpot() == True):
+    global totalNumberOfBonusGames
+    for g in range(0, bonusGamesNumber):
+        totalNumberOfBonusGames += 1
         singleBonusGame()
  
 '''
@@ -534,7 +524,7 @@ def singleBaseGame():
      Count base game hit rate.
      '''
     global baseGameHitRate
-    if (win > 0):
+    if win > 0:
         baseGameHitRate += 1
   
     '''
@@ -542,12 +532,18 @@ def singleBaseGame():
      '''
     global freeGamesNumber
     freeGamesNumber += numberOfFreeSpins(FREE_SPINS_IN_BASE)
-  
+    
+    '''
+     Number of bonus games should be added.
+     '''
+    global bonusGamesNumber
+    bonusGamesNumber += numberOfBonusGames()
+
     '''
      Count number of into free games.
      '''
     global totalNumberOfFreeStarts
-    if (freeGamesNumber > 0):
+    if freeGamesNumber > 0:
         totalNumberOfFreeStarts += 1
   
     '''
@@ -564,7 +560,7 @@ def singleBaseGame():
      Play bonus game if any.
      '''
     global totalNumberOfBonusGames
-    if (collectJackpot() == True):
+    for g in range(0, bonusGamesNumber):
         totalNumberOfBonusGames += 1
         singleBonusGame()
  
@@ -574,7 +570,7 @@ def singleBaseGame():
 
 
 def printDataStructures():
-    if (inDataOutput == False):
+    if inDataOutput == False:
         return
  
     print("================================================================================")
@@ -612,7 +608,7 @@ def printDataStructures():
     print("Base Game Reels:")
     for i in range(0, len(BASE_GAME_REELS)):
         for j in range(0, len(BASE_GAME_REELS[i])):
-            if (j % 10 == 0):
+            if j % 10 == 0:
                 print()
             print("SYM" + BASE_GAME_REELS[i][j] + " ", end="")
         print()
@@ -621,7 +617,7 @@ def printDataStructures():
     print("Free Spins Reels:")
     for i in range(0, len(FREE_SPIN_REELS)):
         for j in range(0, len(FREE_SPIN_REELS[i])):
-            if (j % 10 == 0):
+            if j % 10 == 0:
                 print()
             print("SYM" + FREE_SPIN_REELS[i][j] + " ", end="")
         print()
@@ -653,7 +649,7 @@ def printDataStructures():
         for j in range(0, len(counters[0])):
             sum += counters[i][j]
         print(sum + "\t", end="")
-        if (sum != 0):
+        if sum != 0:
             combinations *= sum
     print()
     print("---------------------------------------------")
@@ -686,7 +682,7 @@ def printDataStructures():
         for j in range(0, len(counters[0])):
             sum += counters[i][j]
         print(sum + "\t", end="")
-        if (sum != 0):
+        if sum != 0:
             combinations *= sum
     print()
     print("---------------------------------------------")
@@ -704,19 +700,19 @@ def printStatistics():
     print("Total Number of Games:\t" + str(totalNumberOfGames))
     print()
  
-    print("Total RTP:\t" + str(wonMoney / lostMoney))
-    print("Base Game RTP:\t" + str((baseMoney) / (lostMoney)))
-    print("Free Spins RTP:\t" + str((freeMoney) / (lostMoney)))
-    print("Bonus Game RTP:\t" + str((bonusMoney) / (lostMoney)))
+    print("Total RTP:\t" + str(wonMoney / max(1, lostMoney)))
+    print("Base Game RTP:\t" + str(baseMoney / max(1, lostMoney)))
+    print("Free Spins RTP:\t" + str(freeMoney / max(1, lostMoney)))
+    print("Bonus Game RTP:\t" + str(bonusMoney / max(1, lostMoney)))
     print()
  
-    print("Base Game Hit Rate:\t" + str(baseGameHitRate / totalNumberOfGames))
-    print("Free Spins Hit Rate:\t" + str(freeGamesHitRate / totalNumberOfFreeGames))
-    print("Bonus Game Hit Rate:\t" + str(bonusGameHitRate / totalNumberOfBonusGames))
+    print("Base Game Hit Rate:\t" + str(baseGameHitRate / max(1, totalNumberOfGames)))
+    print("Free Spins Hit Rate:\t" + str(freeGamesHitRate / max(1, totalNumberOfFreeGames)))
+    print("Bonus Game Hit Rate:\t" + str(bonusGameHitRate / max(1, totalNumberOfBonusGames)))
     print()
  
-    print("Hit Frequency into Free Spins:\t" + str(totalNumberOfFreeStarts / totalNumberOfGames))
-    print("Free Spins Retrigger Frequency:\t" + str(totalNumberOfFreeRestarts / (totalNumberOfFreeGames)))
+    print("Hit Frequency into Free Spins:\t" + str(totalNumberOfFreeStarts / max(1, totalNumberOfGames)))
+    print("Free Spins Retrigger Frequency:\t" + str(totalNumberOfFreeRestarts / max(1, totalNumberOfFreeGames)))
  
 '''
 Print of the help information.
@@ -793,37 +789,36 @@ if __name__ == '__main__':
     printExecuteCommand(sys.argv)
     print()
   
-    numberOfSimulations = 10000  # 000
+    numberOfSimulations = 10000000
   
     for a in range(0, len(sys.argv)):
-        if (len(sys.argv) > 0 and "-l" in sys.argv[a]):
-            lParameter = sys.argv[a].substring(2)
+        if len(sys.argv) > 0 and "-l" in sys.argv[a]:
+            lParameter = sys.argv[a][2:]
   
-            if ("k" in lParameter):
-                lParameter = lParameter.substring(0, len(lParameter) - 1)
+            if "k" in lParameter:
+                lParameter = lParameter[0 : len(lParameter) - 1]
                 lParameter += "000"
   
-            if ("m" in lParameter):
-                lParameter = lParameter.substring(0, len(lParameter) - 1)
+            if "m" in lParameter:
+                lParameter = lParameter[0 : len(lParameter) - 1]
                 lParameter += "000000"
   
             numberOfSimulations = int(lParameter)
   
-        if (len(sys.argv) > 0 and "-verbose" in sys.argv[a]):
+        if len(sys.argv) > 0 and "-verbose" in sys.argv[a]:
             verboseOutput = True
   
-        if (len(sys.argv) > 0 and "-indata" in sys.argv[a]):
+        if len(sys.argv) > 0 and "-indata" in sys.argv[a]:
             inDataOutput = True
   
-        if (len(sys.argv) > 0 and "-help" in sys.argv[a]):
+        if len(sys.argv) > 0 and "-help" in sys.argv[a]:
             exit(0)
   
-        if (len(sys.argv) > 0 and "-h" in sys.argv[a]):
+        if len(sys.argv) > 0 and "-h" in sys.argv[a]:
             exit(0)
   
-    for g in tqdm.tqdm(range(0, numberOfSimulations)):
-        if (verboseOutput == True
-                and ((g + 1) * 100) % numberOfSimulations == 0):
+    for g in (range(0, numberOfSimulations)):
+        if verboseOutput == True and ((g + 1) * 100) % numberOfSimulations == 0:
             print()
             print()
             print()
@@ -834,7 +829,7 @@ if __name__ == '__main__':
             print()
             print()
             print("================================================================================")
-            print("Progress: " + (10000 * (g + 1) / numberOfSimulations) / 100.0 + "%")
+            print("Progress: " + str((10000 * (g + 1) / numberOfSimulations) / 100.0) + "%")
             print("================================================================================")
             print()
             printStatistics()
