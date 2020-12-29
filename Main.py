@@ -11,6 +11,7 @@ import pandas
 import cProfile, pstats, io
 from pstats import SortKey
 import time
+import numpy
  
 ''' Lines information. '''
 LINES = [[1, 1, 1, 1, 1, ],
@@ -310,7 +311,7 @@ def scattersWin(view):
             if value != 0:
                 continue
             number += 1
- 
+  
     ''' Scatter is on index 0. '''
     return (PAYTABLE[number][0] * totalBet)
 
@@ -423,19 +424,16 @@ def numberOfBonusGames():
 
 
 def singleBonusGame():
-    ''' Initialize zeros for a histogram. '''
-    counters = BONUS.copy()
-    
-    for multiplier in random.sample(JACKPOT, 15):
-        counters[multiplier] += 1
-
-    win = 0
-    for multiplier in JACKPOT:
-        ''' Only 3 or more rise a win. '''
-        if counters[multiplier] < 3 or multiplier == 0:
-            continue
-        win = multiplier * totalBet
-        break
+    ''' Calculate histogram. '''
+    sample = random.sample(JACKPOT, 15)
+    counters = {multiplier:sample.count(multiplier) for multiplier in numpy.unique(sample)}
+   
+    ''' Only 3 or more rise a win. '''
+    winning = {multiplier:count for (multiplier, count) in counters.items() if count >= 3 and multiplier != 0}
+    if winning: 
+        win = next(iter(winning)) * totalBet 
+    else: 
+        win = 0
     
     '''
      Add win to the statistics.
@@ -800,11 +798,11 @@ if __name__ == '__main__':
             lParameter = sys.argv[a][2:]
   
             if "k" in lParameter:
-                lParameter = lParameter[0 : len(lParameter) - 1]
+                lParameter = lParameter[0: len(lParameter) - 1]
                 lParameter += "000"
   
             if "m" in lParameter:
-                lParameter = lParameter[0 : len(lParameter) - 1]
+                lParameter = lParameter[0: len(lParameter) - 1]
                 lParameter += "000000"
   
             numberOfSimulations = int(lParameter)
@@ -825,7 +823,7 @@ if __name__ == '__main__':
     profiler.enable()
     moment = int(time.time())
     for g in (range(0, numberOfSimulations)):
-        if verboseOutput == True and moment+10 < int(time.time()):
+        if verboseOutput == True and moment + 10 < int(time.time()):
             moment = int(time.time())
             print()
             print()
