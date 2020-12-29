@@ -7,64 +7,60 @@ Created on Dec 27, 2020
 import sys
 import random
 import pandas
-# import tqdm
+import tqdm
 import cProfile, pstats, io
 from pstats import SortKey
 import time
 import numpy
  
 ''' Lines information. '''
-LINES = [[1, 1, 1, 1, 1, ],
-         [0, 0, 0, 0, 0, ],
-         [2, 2, 2, 2, 2, ],
-         [0, 1, 2, 1, 0, ],
-         [2, 1, 0, 1, 2, ],
-         [1, 0, 0, 0, 1, ],
-         [1, 2, 2, 2, 1, ],
-         [0, 0, 1, 2, 2, ],
-         [2, 2, 1, 0, 0, ],
-         [1, 2, 1, 0, 1, ],
-         [1, 0, 1, 2, 1, ],
-         [0, 1, 1, 1, 0, ],
-         [2, 1, 1, 1, 2, ],
-         [0, 1, 0, 1, 0, ],
-         [2, 1, 2, 1, 2, ],
-         [1, 1, 0, 1, 1, ],
-         [1, 1, 2, 1, 1, ],
-         [0, 0, 2, 0, 0, ],
-         [2, 2, 0, 2, 2, ],
-         [0, 2, 2, 2, 0, ],
-         [2, 0, 0, 0, 2, ],
-         [1, 2, 0, 2, 1, ],
-         [1, 0, 2, 0, 1, ],
-         [0, 2, 0, 2, 0, ],
-         [2, 0, 2, 0, 2, ], ]
+LINES = numpy.array([[1, 1, 1, 1, 1, ],
+                    [0, 0, 0, 0, 0, ],
+                    [2, 2, 2, 2, 2, ],
+                    [0, 1, 2, 1, 0, ],
+                    [2, 1, 0, 1, 2, ],
+                    [1, 0, 0, 0, 1, ],
+                    [1, 2, 2, 2, 1, ],
+                    [0, 0, 1, 2, 2, ],
+                    [2, 2, 1, 0, 0, ],
+                    [1, 2, 1, 0, 1, ],
+                    [1, 0, 1, 2, 1, ],
+                    [0, 1, 1, 1, 0, ],
+                    [2, 1, 1, 1, 2, ],
+                    [0, 1, 0, 1, 0, ],
+                    [2, 1, 2, 1, 2, ],
+                    [1, 1, 0, 1, 1, ],
+                    [1, 1, 2, 1, 1, ],
+                    [0, 0, 2, 0, 0, ],
+                    [2, 2, 0, 2, 2, ],
+                    [0, 2, 2, 2, 0, ],
+                    [2, 0, 0, 0, 2, ],
+                    [1, 2, 0, 2, 1, ],
+                    [1, 0, 2, 0, 1, ],
+                    [0, 2, 0, 2, 0, ],
+                    [2, 0, 2, 0, 2, ], ])
  
 ''' Pay table information. Index 0 is a scatter. Index 1 is a wild. '''
-PAYTABLE = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-            [1, 0, 10, 10, 10, 10, 5, 5, 5, 5, 0, 0, 0, ],
-            [0, 0, 50, 50, 25, 25, 15, 15, 15, 15, 0, 0, 0, ],
-            [0, 0, 500, 300, 250, 200, 100, 100, 100, 100, 0, 0, 0, ], ]
+PAYTABLE = numpy.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
+                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
+                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
+                       [1, 0, 10, 10, 10, 10, 5, 5, 5, 5, 0, 0, 0, ],
+                       [0, 0, 50, 50, 25, 25, 15, 15, 15, 15, 0, 0, 0, ],
+                       [0, 0, 500, 300, 250, 200, 100, 100, 100, 100, 0, 0, 0, ], ])
  
 '''
  Shoe win probability distribution. First is value and second is the chance (sum of chances is 100).
  '''
 SHOE = [5] * 17 + [10] * 16 + [15] * 16 + [25] * 16 + [50] * 15 + [100] * 10 + [200] * 5 + [250] * 3 + [300] * 2 + [500] * 1
 random.shuffle(SHOE)
+SHOE = numpy.array(SHOE)
  
 '''
  Jakpot win probability distribution. First is value and second is the chance (sum of chances is 1000).
  '''
 JACKPOT = [0] * 990 + [3] * 4 + [5] * 3 + [7] * 2 + [9] * 1
 random.shuffle(JACKPOT)
-
-'''
-Available bonus values.
-'''
-BONUS = {}
-for multiplier in JACKPOT: BONUS[multiplier] = 0
+JACKPOT = numpy.array(JACKPOT)
  
 ''' Names of the symbols. '''
 SYMBOLS_NAMES = ["FIRE", "GOLD", "WHITE", "BLACK", "BOY", "GIRL", "ACE", "KING", "QUEEN", "JACK", "SHOE", "JACKPOT", "COLLECT"]
@@ -82,10 +78,10 @@ BASE_GAME_REELS = [[], [], [], [], [], ]
 FREE_SPIN_REELS = [[], [], [], [], [], ]
  
 ''' Probability distribution of the free spins activated in base game. '''
-FREE_SPINS_IN_BASE = [0, 0, 0, 8, 0, 0]
+FREE_SPINS_IN_BASE = numpy.array([0, 0, 0, 8, 0, 0])
  
 ''' Probability distribution of the free spins activated in free spins. '''
-FREE_SPINS_IN_FREE = [0, 0, 0, 8, 0, 0]
+FREE_SPINS_IN_FREE = numpy.array([0, 0, 0, 8, 0, 0])
  
 ''' Flag for verbose output. '''
 verboseOutput = False
@@ -142,11 +138,11 @@ bonusGamesNumber = 0
 totalBet = len(LINES)
  
 ''' Screen configuration after reels spins. '''
-view = [[-1, -1, -1],
+view = numpy.array([[-1, -1, -1],
         [-1, -1, -1],
         [-1, -1, -1],
         [-1, -1, -1],
-        [-1, -1, -1]]
+        [-1, -1, -1]])
  
 '''
  Print active screen configuration.
@@ -190,7 +186,8 @@ def reelsFromTextToNumbers(numbers, text):
                     continue
                 numbers[i][j] = k
                 break
-   
+            
+    numbers = numpy.array(numbers)
     return numbers
 
   
@@ -276,7 +273,7 @@ def linesWin(view):
      Check wins in all possible lines.
      '''
     for indices in LINES:
-        line = [-1, -1, -1, -1, -1]
+        line = numpy.array([-1, -1, -1, -1, -1])
  
         '''
          Prepare line for combination check.
@@ -425,15 +422,15 @@ def numberOfBonusGames():
 
 def singleBonusGame():
     ''' Calculate histogram. '''
-    sample = random.sample(JACKPOT, 15)
-    counters = {multiplier:sample.count(multiplier) for multiplier in numpy.unique(sample)}
+    sample = numpy.random.choice(JACKPOT, 15)
+    multipliers, counters = numpy.unique(sample, return_counts=True)
    
+    win = 0
     ''' Only 3 or more rise a win. '''
-    winning = {multiplier:count for (multiplier, count) in counters.items() if count >= 3 and multiplier != 0}
-    if winning: 
-        win = next(iter(winning)) * totalBet 
-    else: 
-        win = 0
+    for multiplier, count in zip(multipliers, counters):
+        if count >= 3 and multiplier != 0:
+            win = multiplier * totalBet 
+            break
     
     '''
      Add win to the statistics.
@@ -779,7 +776,7 @@ def printExecuteCommand(args):
 '''
  Application single entry point.
  
- @param args
+ @param argv
             Command line arguments.
 '''
 if __name__ == '__main__':
@@ -822,7 +819,7 @@ if __name__ == '__main__':
     profiler = cProfile.Profile()
     profiler.enable()
     moment = int(time.time())
-    for g in (range(0, numberOfSimulations)):
+    for g in tqdm.tqdm(range(0, numberOfSimulations)):
         if verboseOutput == True and moment + 10 < int(time.time()):
             moment = int(time.time())
             print()
@@ -838,6 +835,7 @@ if __name__ == '__main__':
             print("Progress: " + str((10000 * (g + 1) / numberOfSimulations) / 100.0) + "%")
             print("================================================================================")
             print()
+            rtp = wonMoney / max(1, lostMoney)
             printStatistics()
             print()
   
