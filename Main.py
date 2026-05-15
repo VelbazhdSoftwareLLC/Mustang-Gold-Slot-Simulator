@@ -155,7 +155,7 @@ view = numpy.array([[-1, -1, -1],
 def printView(view):
     maximum = len(view[0])
     for i in range(0, len(view)):
-        if max < len(view[i]):
+        if maximum < len(view[i]):
             maximum = len(view[i])
  
     for j in range(0, maximum):
